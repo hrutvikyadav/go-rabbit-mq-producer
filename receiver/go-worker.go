@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -15,6 +17,17 @@ func failOnError(err error, msg string) {
 }
 
 func main() {
+	// prepare log file
+	pid := os.Getpid()
+	logFileName := fmt.Sprintf("/home/hrutvik_/pers/rabbit-mq/worker-%d-log.txt", pid)
+
+	// open the log file in append mode; create it if it doesn't exist
+	logFile, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	failOnError(err, "Failed to open log file")
+	defer logFile.Close()
+
+	// set log output to the log file
+	log.SetOutput(logFile)
 
 	// connect to rabbitmq broker
 	conn, err := amqp.Dial("amqp://hrutvik:rabbit@localhost:5672/")
@@ -42,7 +55,7 @@ func main() {
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		true,   // auto-ack
+		false,   // manual-ack
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -60,6 +73,7 @@ func main() {
 			t:= time.Duration(dotCount)
 			time.Sleep(t * time.Second)
 			log.Printf("Done")
+			d.Ack(false)
 		}
 	}()
 
