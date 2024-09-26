@@ -1,11 +1,13 @@
 package main
 
 import (
-  "context"
-  "log"
-  "time"
+	"context"
+	"log"
+	"os"
+	"strings"
+	"time"
 
-  amqp "github.com/rabbitmq/amqp091-go"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 // helper function to check return value for rach amqp call
@@ -13,6 +15,17 @@ func failOnError(err error, msg string) {
 	if err != nil {
 		log.Panicf("%s: %s", msg, err)
 	}
+}
+
+func bodyFrom(args []string) string {
+	var s string
+	if(len(args) < 2) || args[1] == "" {
+		s = "Hello"
+	} else {
+		s = strings.Join(args[1:], " ")
+	}
+
+	return s
 }
 
 func main() {
@@ -41,8 +54,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// publish a message to the queue
-	body := "Hello World!"
+	body := bodyFrom(os.Args)
 	err = ch.PublishWithContext(ctx,
 		"",     // exchange
 		q.Name, // routing key

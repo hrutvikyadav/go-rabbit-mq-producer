@@ -1,1 +1,4 @@
 Session.vim
+receiver/.test-worker-pids.txt
+receiver/go-worker
+sample-queue-response.json
