@@ -42,14 +42,21 @@ func main() {
 	// declare a queue
 	// NOTE: this is idempotent, meaning it will only be created if it doesn't exist already
 	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
+		"durable_task_queue", // name
+		true,   // durable
 		false,   // delete when unused
 		false,   // exclusive
 		false,   // no-wait
 		nil,     // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
+
+	err = ch.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
+	failOnError(err, "Failed to set QoS")
 
 	// consume messages from the queue
 	msgs, err := ch.Consume(

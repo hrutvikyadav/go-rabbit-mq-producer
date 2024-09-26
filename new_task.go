@@ -42,8 +42,8 @@ func main() {
 	// declare a queue
 	// NOTE: this is idempotent, meaning it will only be created if it doesn't exist already
 	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
+		"durable_task_queue", // name
+		true,   // durable
 		false,   // delete when unused
 		false,   // exclusive
 		false,   // no-wait
@@ -61,6 +61,7 @@ func main() {
 		false,  // mandatory
 		false,  // immediate
 		amqp.Publishing{
+			DeliveryMode: amqp.Persistent,
 			ContentType: "text/plain",
 			Body:        []byte(body),
 		})
